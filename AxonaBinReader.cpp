@@ -31,20 +31,28 @@ bool const AxonaBinReader::Read()
 {
 	long fsize = GetFileSize(GetBinFname());
 	long total_samples = fsize / _chunksize;
-	total_samples *= 3;
+	total_samples *= _samples_per_chunk;
 	std::cout << total_samples << std::endl;
 
 	const int buff_size = _chunksize;
 	std::vector<char> buffer(buff_size, 0);
+	std::vector<std::vector<int16_t>> channel_data(
+		_num_channels, std::vector<int16_t>(total_samples, 0));
+
 	std::ifstream infile;
 	infile.open(_bin_fname, std::ios::binary | std::ios::in);
+	int sample_count = 0;
 	while (infile.read(buffer.data(), buffer.size())) {
-		std::streamsize s = infile.gcount();
-		int16_t val = ConvertBytes(
-			buffer[_header_bytes + 1], 
-			buffer[_header_bytes]);
-		std::cout << val << std::endl;
+		for (int i = _header_bytes; i < _chunksize - _trailer_bytes; i = i + _sample_bytes) {
+			int compare_val = (i - _header_bytes) / 2;
+			int row_sample = compare_val % _num_channels;
+			int col_sample = sample_count + (compare_val / _num_channels);
+			int16_t val = ConvertBytes(buffer[i + 1], buffer[i]);
+			channel_data[_reverse_map_channels[row_sample]][col_sample] = val;
+		}
+		sample_count += 3;
 	}
+	// std::ostream outfile;
 	return true;
 }
 
