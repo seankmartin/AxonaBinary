@@ -4,6 +4,7 @@ class AxonaBinReader
 {
 	std::string _set_fname;
 	std::string _bin_fname;
+	std::string _out_fname;
 
 	int _remap_channels[64] = {
 		32, 33, 34, 35, 36, 37, 38, 39,
