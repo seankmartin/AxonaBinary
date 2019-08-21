@@ -1,12 +1,10 @@
-#pragma once
-#include <iostream>
 #include <fstream>
-#include <experimental/filesystem>
 
-namespace fs = std::experimental::filesystem;
-inline long GetFileSize(std::string filename)
-{	
-	fs::path p{ filename };
-	p = fs::canonical(filename);
-	return fs::file_size(p);
+
+long GetFileSize(std::string filename)
+{
+    long length;
+    std::ifstream in(filename, std::ifstream::ate | std::ifstream::binary);
+    length = in.tellg();
+    return length;
 }
